@@ -38,8 +38,20 @@ BEGIN
     SELECT idPartida INTO idPartidaAct FROM PARTIDA ORDER BY idPartida DESC LIMIT 1;
 
     CALL crearTablero(idPartidaAct, idA, idB);
+    CALL llenarNavio(idPartidaAct, idA, idB);
 
-    RETURN 'Partida creada correctamente';
+    RETURN CONCAT('Partida creada correctamente id: ', idPartidaAct);
+
+END //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS llenarNavio;
+DELIMITER //
+CREATE PROCEDURE llenarNavio(IN idPartidaP INT, IN idJ1 INT, IN idJ2 INT)
+BEGIN
+
+    INSERT INTO NAVIO (idPartida, jugador) VALUES (idPartidaP, idJ1);
+    INSERT INTO NAVIO (idPartida, jugador) VALUES (idPartidaP, idJ2);
 
 END //
 DELIMITER ;
@@ -60,6 +72,23 @@ BEGIN
         END IF;
         SET filas = filas + 1;
     END WHILE;
+
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE FUNCTION logUsuario() RETURNS VARCHAR(255)
+BEGIN
+
+    DECLARE username VARCHAR(255);
+    SET username = USER();
+
+    IF NOT EXISTS (SELECT 1 FROM JUGADOR WHERE nombreJugador = username) THEN
+        INSERT INTO JUGADOR (nombreJugador) VALUES (username);
+        RETURN CONCAT('Usuario: ', username, ' registrado correctamente.');
+    END IF;
+
+    RETURN CONCAT('Usuario: ', username, ' ya esta registrado');
 
 END //
 DELIMITER ;
