@@ -1,4 +1,5 @@
--- Active: 1681642058501@@127.0.0.1@3306@battleship
+-- Active: 1681730644093@@localhost@3306@battleship
+
 USE battleship;
 
 DROP FUNCTION IF EXISTS logUsuario;
@@ -359,9 +360,9 @@ BEGIN
     -- Verificamos si algun jugador ha destruido todos los navios
     IF user1Des = 4 OR user2Des = 4 THEN
         IF estadoAct = 1 THEN
-            UPDATE PARTIDA SET estado = 3 WHERE idPartida = idPartidaT;
-        ELSE 
             UPDATE PARTIDA SET estado = 4 WHERE idPartida = idPartidaT;
+        ELSE 
+            UPDATE PARTIDA SET estado = 3 WHERE idPartida = idPartidaT;
         END IF;
     END IF;
 
@@ -378,7 +379,7 @@ END//
 DELIMITER ;
 
 DROP FUNCTION IF EXISTS disparar;
-CREATE FUNCTION disparar(idPartidaF INT, coorX CHAR(1), coorY INT) RETURNS VARCHAR(60)
+CREATE FUNCTION disparar(idPartidaF INT, coorX CHAR(1), coorY INT) RETURNS VARCHAR(160)
 BEGIN
 
     DECLARE username VARCHAR(255);
@@ -399,6 +400,11 @@ BEGIN
     -- Verificamos que las coordenadas indicadas son correctas
     IF (coorY < 1 OR coorY > 10 OR coorX NOT IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J')) THEN
         RETURN 'Las coordenadas especificadas no son correctas.';
+    END IF;
+
+    -- Verificamos que la partida en fase de tiro
+    IF estadoAct = 3 OR estadoAct = 4 THEN
+        RETURN 'La partida ha finalizado. Has perdido.';
     END IF;
 
     -- Verificamos si es su turno

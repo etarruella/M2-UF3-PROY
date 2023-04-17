@@ -62,3 +62,13 @@ print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'portaaviones
 print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'acorazado', 'B', 7, 1);"))
 print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'destructor', 'E', 3, 0);"))
 print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'submarino', 'B', 2, 0);"))
+
+# Disparamos
+print(ejecutar_consulta("jose", "root", "SELECT disparar(1, 'C', 2);"))
+print(ejecutar_consulta("gonzalo", "root", "SELECT disparar(1, 'G', 4);"))
+print(ejecutar_consulta("jose", "root", "SELECT disparar(1, 'C', 2);"))
+print(ejecutar_consulta("gonzalo", "root", "SELECT disparar(1, 'C', 2);"))
+print(ejecutar_consulta("jose", "root", "SELECT disparar(1, 'C', 2);"))
+print(ejecutar_consulta("gonzalo", "root", "SELECT disparar(1, 'C', 4);"))
+print(ejecutar_consulta("jose", "root", "SELECT disparar(1, 'C', 2);"))
+print(ejecutar_consulta("gonzalo", "root", "SELECT disparar(1, 'B', 6);"))
