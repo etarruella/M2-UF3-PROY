@@ -1,4 +1,4 @@
--- Active: 1681642058501@@127.0.0.1@3306@3enRaya
+-- Active: 1680536394058@@127.0.0.1@3306@battleship
 
 /* Estructura de la BBDD */
 
@@ -67,9 +67,10 @@ ALTER TABLE NAVIO ADD CONSTRAINT fkNavioIdPartida FOREIGN KEY (idPartida) REFERE
 ALTER TABLE NAVIO ADD CONSTRAINT fkNavioJugador FOREIGN KEY (jugador) REFERENCES JUGADOR(idJugador) ON UPDATE CASCADE ON DELETE CASCADE;
 
 -- Añadimos los estados posibles de una partida (unica tabla que no será modificada por rutinas)
-INSERT INTO ESTADO VALUES (0, "Turno jugador 1");
-INSERT INTO ESTADO VALUES (1, "Turno jugador 2");
-INSERT INTO ESTADO VALUES (2, "Ganada por jugador 1");
+INSERT INTO ESTADO VALUES (0, "Colocación de naves");
+INSERT INTO ESTADO VALUES (1, "Turno jugador 1");
+INSERT INTO ESTADO VALUES (2, "Turno jugador 2");
 INSERT INTO ESTADO VALUES (3, "Ganada por jugador 1");
+INSERT INTO ESTADO VALUES (4, "Ganada por jugador 1");
 
 -- No rellenamos las demás tablas, pues, estas serán gestionadas por las rutinas
