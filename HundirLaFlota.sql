@@ -1,4 +1,4 @@
--- Active: 1680536394058@@127.0.0.1@3306@battleship
+-- Active: 1681730644093@@localhost@3306@battleship
 
 /* Estructura de la BBDD */
 
@@ -37,8 +37,8 @@ CREATE TABLE NAVIO (
     jugador INT,
     portaaviones INT DEFAULT 1,
     acorazado INT DEFAULT 1,
-    detructor INT DEFAULT 2,
-    submanrino INT DEFAULT 1,
+    destructor INT DEFAULT 2,
+    submarino INT DEFAULT 1,
     PRIMARY KEY (idPartida, jugador)
 );
 

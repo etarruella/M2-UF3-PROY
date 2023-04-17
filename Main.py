@@ -12,10 +12,30 @@ admin = mysql.connector.connect(
   database="mysql"
 )
 
-mycursor = admin.cursor()
+cursor_ad = admin.cursor()
 
-FILES = ["HundirLaFlota.sql", "Usuarios.sql", "RutinasDelUsuario.sql"]
-for FILE in FILES:
-    with open(WORKSPACE + FILE, "r") as f:
-        sql_script = f.read()
-mycursor.execute(sql_script)
+FILE = "HundirLaFlota.sql"
+
+with open(WORKSPACE + FILE, "r") as f:
+    sql_script = f.read()
+cursor_ad.execute(sql_script)
+
+user1 = mysql.connector.connect(
+  host="localhost",
+  user="gonzalo",
+  password="root",
+  database="battleship"
+)
+
+user2 = mysql.connector.connect(
+  host="localhost",
+  user="jose",
+  password="root",
+  database="battleship"
+)
+
+cursor_u1 = user1.cursor()
+cursor_u2 = user2.cursor()
+
+cursor_u1.execute("SELECT logUsuario()")
+cursor_u2.execute("SELECT logUsuario()")

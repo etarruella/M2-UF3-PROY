@@ -16,3 +16,5 @@ CREATE USER 'gonzalo'@'localhost' IDENTIFIED BY 'root';
 
 -- Administración de los permisos (principalmente execute) únicamente podrán trabajar con rutinas
 GRANT EXECUTE ON FUNCTION logUsuario TO 'jose'@'localhost', 'dolores'@'localhost', 'alan'@'localhost', 'gonzalo'@'localhost';
+GRANT EXECUTE ON FUNCTION crearPartida TO 'jose'@'localhost', 'dolores'@'localhost', 'alan'@'localhost', 'gonzalo'@'localhost';
+GRANT EXECUTE ON FUNCTION colocarNavio TO 'jose'@'localhost', 'dolores'@'localhost', 'alan'@'localhost', 'gonzalo'@'localhost';
