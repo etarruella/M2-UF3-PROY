@@ -37,7 +37,7 @@ CREATE TABLE NAVIO (
     jugador INT,
     portaaviones INT DEFAULT 1,
     acorazado INT DEFAULT 1,
-    destructor INT DEFAULT 2,
+    destructor INT DEFAULT 1,
     submarino INT DEFAULT 1,
     destruidos INT DEFAULT 0,
     tiros INT DEFAULT 0,
