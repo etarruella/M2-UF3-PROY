@@ -1,4 +1,4 @@
--- Active: 1681730644093@@localhost@3306@battleship
+-- Active: 1681642058501@@127.0.0.1@3306@battleship
 USE battleship;
 
 DROP FUNCTION IF EXISTS logUsuario;
@@ -115,7 +115,7 @@ BEGIN
     IF navio LIKE '%portaaviones%' THEN
         IF portaavionesF < 1 THEN
             RETURN 'Ya hay un portaaviones desplegado';
-        ELSEIF (fila > 5 OR columna NOT IN ('A', 'B', 'C', 'D', 'E', 'F')) THEN
+        ELSEIF (fila > 6 OR columna NOT IN ('A', 'B', 'C', 'D', 'E', 'F')) THEN
             RETURN 'No se puede desplegar un portaaviones en esta posición';
         END IF;
         CALL llenado(idPartidaP, userId, fila, columna, 5, orientacion, 'P', @resultadoF);
@@ -123,7 +123,7 @@ BEGIN
     ELSEIF navio LIKE '%acorazado%' THEN
         IF acorazadoF < 1 THEN
             RETURN 'Ya hay un acorazado desplegado';
-        ELSEIF (fila > 6 OR columna NOT IN ('A', 'B', 'C', 'D', 'E', 'F', 'G')) THEN
+        ELSEIF (fila > 7 OR columna NOT IN ('A', 'B', 'C', 'D', 'E', 'F', 'G')) THEN
             RETURN 'No se puede desplegar un acorazado en esta posición';
         END IF;
         CALL llenado(idPartidaP, userId, fila, columna, 4, orientacion, 'A', @resultadoF);
@@ -131,7 +131,7 @@ BEGIN
     ELSEIF navio LIKE '%destructor%' THEN
         IF destructorF < 1 THEN
             RETURN 'Ya estan desplegados todos los destructores';
-        ELSEIF (fila > 7 OR columna NOT IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H')) THEN
+        ELSEIF (fila > 9 OR columna NOT IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H')) THEN
             RETURN 'No se puede desplegar un destructor en esta posición';
         END IF;
         CALL llenado(idPartidaP, userId, fila, columna, 3, orientacion, 'D', @resultadoF);
@@ -311,6 +311,147 @@ BEGIN
     ELSE
         SET resultado = 1;
         UPDATE TABLERO SET colB = ' ' WHERE userIdAct = jugador AND idPartida = idPartidaAct AND filaAct = fila;
+    END IF;
+
+END//
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS mostrarTablero;
+DELIMITER //
+CREATE PROCEDURE mostrarTablero(IN idPartidaP INT)
+`whole_proc`:
+BEGIN
+
+    DECLARE usuario VARCHAR(255);
+    DECLARE userId INT;
+
+    SET usuario = USER();
+    SELECT idJugador INTO userId FROM JUGADOR WHERE usuario = nombreJugador;
+
+    SELECT fila AS 'X', colA AS 'A', colB AS 'B', colC AS 'C', colD AS 'D', colE AS 'E', colF AS 'F', colG AS 'G', colH AS 'H', colI AS 'I', colJ AS 'J' FROM TABLERO WHERE idPartidaP = idPartida AND userId = jugador;
+
+END//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS actualizarEstado;
+DELIMITER //
+CREATE TRIGGER actualizarEstado AFTER UPDATE ON NAVIO FOR EACH ROW
+`whole_trigger`:
+BEGIN
+    
+    DECLARE idPartidaT, estadoAct, userId1, userId2, user1Des, user2Des, p1, a1, d1, s1, p2, a2, d2, s2 INT;
+
+    SET idPartidaT = OLD.idPartida;
+    SELECT estado INTO estadoAct FROM PARTIDA WHERE idPartidaT = idPartida;
+    SET userId1 = OLD.jugador;
+    SELECT jugador INTO userId2 FROM NAVIO WHERE jugador <> userId1 AND idPartidaT = idPartida;
+    SELECT portaaviones, acorazado, destructor, submarino INTO  p1, a1, d1, s1 FROM NAVIO WHERE idPartida = idPartidaT AND userId1 = jugador;
+    SELECT portaaviones, acorazado, destructor, submarino INTO  p2, a2, d2, s2 FROM NAVIO WHERE idPartida = idPartidaT AND userId2 = jugador;
+    SELECT destruidos INTO user1Des FROM NAVIO WHERE idPartidaT = idPartida AND userId1 = jugador;
+    SELECT destruidos INTO user2Des FROM NAVIO WHERE idPartidaT = idPartida AND userId2 = jugador;
+
+    -- Verificamos si se ha terminado la fase de colocar navios
+    IF EXISTS (SELECT 1 FROM PARTIDA WHERE estado = 0 AND idPartidaT = idPartida) AND p1 = 0 AND a1 = 0 AND d1 = 0 AND s1 = 0 AND p2 = 0 AND a2 = 0 AND d2 = 0 AND s2 = 0 THEN
+        UPDATE PARTIDA SET estado = 1 WHERE idPartida = idPartidaT;
+        LEAVE `whole_trigger`;
+    END IF;
+
+    -- Verificamos si algun jugador ha destruido todos los navios
+    IF user1Des = 5 OR user2Des = 5 THEN
+        IF estadoAct = 1 THEN
+            UPDATE PARTIDA SET estado = 3 WHERE idPartida = idPartidaT;
+        ELSE 
+            UPDATE PARTIDA SET estado = 4 WHERE idPartida = idPartidaT;
+        END IF;
+    END IF;
+
+    -- Verificamos si se tiene que iterar el turno del jugador
+    IF OLD.tiros < NEW.tiros THEN
+        IF estadoAct = 1 THEN
+            UPDATE PARTIDA SET estado = 2 WHERE idPartida = idPartidaT;
+        ELSE 
+            UPDATE PARTIDA SET estado = 1 WHERE idPartida = idPartidaT;
+        END IF;
+    END IF;
+
+END//
+DELIMITER ;
+
+DROP FUNCTION IF EXISTS disparar;
+CREATE FUNCTION disparar(idPartidaF INT, coorX CHAR(1), coorY INT) RETURNS VARCHAR(60)
+BEGIN
+
+    DECLARE username VARCHAR(255);
+    DECLARE userId, userIdE INT;
+    DECLARE estadoAct INT;
+    DECLARE tipoN CHAR(1);
+
+    SET username = USER();
+    SELECT idJugador INTO userId FROM JUGADOR WHERE nombreJugador = username;
+    SELECT jugador INTO userIde FROM NAVIO WHERE idPartidaF = idPartida AND userId <> jugador;
+    SELECT estado INTO estadoAct FROM PARTIDA WHERE idPartidaF = idPartida;
+
+    -- Verificamos que el usuario existe en la partida
+    IF NOT EXISTS (SELECT 1 FROM PARTIDA WHERE (userId = jugadorA OR userId = jugadorB) AND idPartida = idPartidaF) THEN
+        RETURN 'El jugador no se encuentra en la partida, o la partida no existe';
+    END IF;
+
+    -- Verificamos que las coordenadas indicadas son correctas
+    IF (coorY < 1 OR coorY > 10 OR coorX NOT IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J')) THEN
+        RETURN 'Las coordenadas especificadas no son correctas.';
+    END IF;
+
+    -- Verificamos si es su turno
+    IF estadoAct = 1 AND NOT EXISTS (SELECT 1 FROM PARTIDA WHERE idPartidaF = idPartida AND userId = jugadorA) THEN
+        RETURN 'Es el turno del jugador 1';
+    ELSEIF estadoAct = 2 AND NOT EXISTS (SELECT 1 FROM PARTIDA WHERE idPartidaF = idPartida AND userId = jugadorB) THEN
+        RETURN 'Es el turno del jugador 2';
+    END IF;
+
+    UPDATE NAVIO SET tiros = tiros + 1 WHERE idPartidaF = idPartida AND jugador = userId;
+
+    IF coorX = 'A' THEN
+        SELECT colA INTO tipoN FROM TABLERO WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+        UPDATE TABLERO SET colA = 'X' WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+    ELSEIF coorX = 'B' THEN
+        SELECT colB INTO tipoN FROM TABLERO WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+        UPDATE TABLERO SET colB = 'X' WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+    ELSEIF coorX = 'C' THEN
+        SELECT colC INTO tipoN FROM TABLERO WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+        UPDATE TABLERO SET colC = 'X' WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+    ELSEIF coorX = 'D' THEN
+        SELECT colD INTO tipoN FROM TABLERO WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+        UPDATE TABLERO SET colD = 'X' WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+    ELSEIF coorX = 'E' THEN
+        SELECT colE INTO tipoN FROM TABLERO WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+        UPDATE TABLERO SET colE = 'X' WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+    ELSEIF coorX = 'F' THEN
+        SELECT colF INTO tipoN FROM TABLERO WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+        UPDATE TABLERO SET colF = 'X' WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+    ELSEIF coorX = 'G' THEN
+        SELECT colG INTO tipoN FROM TABLERO WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+        UPDATE TABLERO SET colG = 'X' WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+    ELSEIF coorX = 'H' THEN
+        SELECT colH INTO tipoN FROM TABLERO WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+        UPDATE TABLERO SET colH = 'X' WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+    ELSEIF coorX = 'I' THEN
+        SELECT colI INTO tipoN FROM TABLERO WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+        UPDATE TABLERO SET colI = 'X' WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+    ELSEIF coorX = 'J' THEN
+        SELECT colJ INTO tipoN FROM TABLERO WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+        UPDATE TABLERO SET colJ = 'X' WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
+    END IF;
+
+    IF tipoN = ' ' THEN
+        RETURN 'MISS: AGUA';
+    ELSEIF tipoN = 'P' THEN
+        RETURN 'IMPACTO: portaaviones enemigo destruido';
+    ELSEIF tipoN= 'A' THEN
+        RETURN 'IMPACTO: acorazado enemigo destruido';
+    ELSEIF tipoN = 'D' THEN
+        RETURN 'IMPACTO: destructor enemigo destruido';
+    ELSEIF tipoN = 'S' THEN
+        RETURN 'IMPACTO: submarino enemigo destruido';
     END IF;
 
 END//

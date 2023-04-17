@@ -1,4 +1,4 @@
--- Active: 1681730644093@@localhost@3306@battleship
+-- Active: 1681642058501@@127.0.0.1@3306@battleship
 
 /* Estructura de la BBDD */
 
@@ -39,6 +39,8 @@ CREATE TABLE NAVIO (
     acorazado INT DEFAULT 1,
     destructor INT DEFAULT 2,
     submarino INT DEFAULT 1,
+    destruidos INT DEFAULT 0,
+    tiros INT DEFAULT 0,
     PRIMARY KEY (idPartida, jugador)
 );
 
@@ -71,6 +73,6 @@ INSERT INTO ESTADO VALUES (0, "Colocación de naves");
 INSERT INTO ESTADO VALUES (1, "Turno jugador 1");
 INSERT INTO ESTADO VALUES (2, "Turno jugador 2");
 INSERT INTO ESTADO VALUES (3, "Ganada por jugador 1");
-INSERT INTO ESTADO VALUES (4, "Ganada por jugador 1");
+INSERT INTO ESTADO VALUES (4, "Ganada por jugador 2");
 
 -- No rellenamos las demás tablas, pues, estas serán gestionadas por las rutinas

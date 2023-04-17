@@ -1,3 +1,4 @@
+-- Active: 1681642058501@@localhost@3306@battleship
 /* Gestión de usuarios (creación y administración de permisos) */
 /* ejecutar cómo root */
 
@@ -18,3 +19,5 @@ CREATE USER 'gonzalo'@'localhost' IDENTIFIED BY 'root';
 GRANT EXECUTE ON FUNCTION logUsuario TO 'jose'@'localhost', 'dolores'@'localhost', 'alan'@'localhost', 'gonzalo'@'localhost';
 GRANT EXECUTE ON FUNCTION crearPartida TO 'jose'@'localhost', 'dolores'@'localhost', 'alan'@'localhost', 'gonzalo'@'localhost';
 GRANT EXECUTE ON FUNCTION colocarNavio TO 'jose'@'localhost', 'dolores'@'localhost', 'alan'@'localhost', 'gonzalo'@'localhost';
+GRANT EXECUTE ON FUNCTION disparar TO 'jose'@'localhost', 'dolores'@'localhost', 'alan'@'localhost', 'gonzalo'@'localhost';
+GRANT EXECUTE ON PROCEDURE mostrarTablero TO 'jose'@'localhost', 'dolores'@'localhost', 'alan'@'localhost', 'gonzalo'@'localhost';

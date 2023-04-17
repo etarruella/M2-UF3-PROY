@@ -1,41 +1,66 @@
-import mysql.connector
+import mariadb
+import sys
 
-USER = "erik"
-HOST = "localhost"
-PASSWD = "root"
-WORKSPACE = "/home/erik/workspace/M2-PROY-UF3/"
+ADMIN_USER = "erik"
+ADMIN_HOST = "localhost"
+ADMIN_PASSWD = "root"
+WORKSPACE = "/home/erik/workspace/M2-UF3-PROY/"
 
-admin = mysql.connector.connect(
-  host=HOST,
-  user=USER,
-  password=PASSWD,
-  database="mysql"
-)
+def ejecutar_consulta(usuario, contraseña, consulta):
+	mydb = mariadb.connect(
+		host="localhost",
+		user=usuario,
+		password=contraseña,
+		database="battleship"
+	)
+	
+	mycursor = mydb.cursor()
 
-cursor_ad = admin.cursor()
+	mycursor.execute(consulta)
 
-FILE = "HundirLaFlota.sql"
+	mydb.commit()
 
-with open(WORKSPACE + FILE, "r") as f:
-    sql_script = f.read()
-cursor_ad.execute(sql_script)
+	resultados = mycursor.fetchall()
 
-user1 = mysql.connector.connect(
-  host="localhost",
-  user="gonzalo",
-  password="root",
-  database="battleship"
-)
+	mydb.close()
+    
+	return resultados
 
-user2 = mysql.connector.connect(
-  host="localhost",
-  user="jose",
-  password="root",
-  database="battleship"
-)
+def ejecutar_vista(usuario, contraseña, consulta):
+	mydb = mariadb.connect(
+		host="localhost",
+		user=usuario,
+		password=contraseña,
+		database="battleship"
+	)
+	
+	mycursor = mydb.cursor()
 
-cursor_u1 = user1.cursor()
-cursor_u2 = user2.cursor()
+	mycursor.execute(consulta)
 
-cursor_u1.execute("SELECT logUsuario()")
-cursor_u2.execute("SELECT logUsuario()")
+	resultados = mycursor.fetchall()
+
+	mydb.close()
+    
+	return resultados
+
+# Creamos la partida con uno de los usuarios
+print(ejecutar_consulta("jose", "root", "SELECT logUsuario();"))
+print(ejecutar_consulta("gonzalo", "root", "SELECT logUsuario();"))
+
+
+# Creamos la partida con uno de los usuarios
+print(ejecutar_consulta("jose", "root", "SELECT crearPartida('jose@localhost', 'gonzalo@localhost');"))
+
+# Colocamos los navios de los usuarios
+print(ejecutar_consulta("jose", "root", "SELECT colocarNavio(1, 'portaaviones', 'C', 2, 0);"))
+print(ejecutar_consulta("jose", "root", "SELECT colocarNavio(1, 'acorazado', 'G', 4, 1);"))
+print(ejecutar_consulta("jose", "root", "SELECT colocarNavio(1, 'destructor', 'C', 4, 0);"))
+print(ejecutar_consulta("jose", "root", "SELECT colocarNavio(1, 'destructor', 'E', 8, 1);"))
+print(ejecutar_consulta("jose", "root", "SELECT colocarNavio(1, 'submarino', 'B', 6, 1);"))
+
+print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'portaaviones', 'D', 5, 0);"))
+print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'acorazado', 'B', 7, 1);"))
+print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'destructor', 'E', 3, 0);"))
+print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'destructor', 'E', 7, 0);"))
+print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'submarino', 'B', 2, 0);"))
