@@ -56,11 +56,9 @@ print(ejecutar_consulta("jose", "root", "SELECT crearPartida('jose@localhost', '
 print(ejecutar_consulta("jose", "root", "SELECT colocarNavio(1, 'portaaviones', 'C', 2, 0);"))
 print(ejecutar_consulta("jose", "root", "SELECT colocarNavio(1, 'acorazado', 'G', 4, 1);"))
 print(ejecutar_consulta("jose", "root", "SELECT colocarNavio(1, 'destructor', 'C', 4, 0);"))
-print(ejecutar_consulta("jose", "root", "SELECT colocarNavio(1, 'destructor', 'E', 8, 1);"))
 print(ejecutar_consulta("jose", "root", "SELECT colocarNavio(1, 'submarino', 'B', 6, 1);"))
 
 print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'portaaviones', 'D', 5, 0);"))
 print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'acorazado', 'B', 7, 1);"))
 print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'destructor', 'E', 3, 0);"))
-print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'destructor', 'E', 7, 0);"))
 print(ejecutar_consulta("gonzalo", "root", "SELECT colocarNavio(1, 'submarino', 'B', 2, 0);"))

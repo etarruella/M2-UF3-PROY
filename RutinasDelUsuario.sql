@@ -357,7 +357,7 @@ BEGIN
     END IF;
 
     -- Verificamos si algun jugador ha destruido todos los navios
-    IF user1Des = 5 OR user2Des = 5 THEN
+    IF user1Des = 4 OR user2Des = 4 THEN
         IF estadoAct = 1 THEN
             UPDATE PARTIDA SET estado = 3 WHERE idPartida = idPartidaT;
         ELSE 
@@ -442,17 +442,50 @@ BEGIN
         UPDATE TABLERO SET colJ = 'X' WHERE idPartidaF = idPartida AND coorY = fila AND jugador = userIdE;
     END IF;
 
-    IF tipoN = ' ' THEN
+    IF tipoN = ' ' OR tipoN = 'X' THEN
         RETURN 'MISS: AGUA';
     ELSEIF tipoN = 'P' THEN
+        CALL hundirNavio('P', idPartidaF, userIdE);
+        UPDATE NAVIO SET destruidos = destruidos + 1 WHERE idPartidaF = idPartida AND jugador = userIdE;
         RETURN 'IMPACTO: portaaviones enemigo destruido';
     ELSEIF tipoN= 'A' THEN
+        CALL hundirNavio('A', idPartidaF, userIdE);
+        UPDATE NAVIO SET destruidos = destruidos + 1 WHERE idPartidaF = idPartida AND jugador = userIdE;
         RETURN 'IMPACTO: acorazado enemigo destruido';
     ELSEIF tipoN = 'D' THEN
+        CALL hundirNavio('D', idPartidaF, userIdE);
+        UPDATE NAVIO SET destruidos = destruidos + 1 WHERE idPartidaF = idPartida AND jugador = userIdE;
         RETURN 'IMPACTO: destructor enemigo destruido';
     ELSEIF tipoN = 'S' THEN
+        CALL hundirNavio('S', idPartidaF, userIdE);
+        UPDATE NAVIO SET destruidos = destruidos + 1 WHERE idPartidaF = idPartida AND jugador = userIdE;
         RETURN 'IMPACTO: submarino enemigo destruido';
     END IF;
+
+END//
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS hundirNavio;
+DELIMITER //
+CREATE PROCEDURE hundirNavio(IN tipoNavio CHAR(1), IN idPartidaP INT, IN idJugadorP INT)
+BEGIN
+
+    DECLARE contador INT;
+
+    SET contador = 1;
+    WHILE contador <= 10 DO
+        UPDATE TABLERO SET colA = ' ' WHERE idPartidaP = idPartida AND contador = fila AND jugador = idJugadorP AND colA = tipoNavio;
+        UPDATE TABLERO SET colB = ' ' WHERE idPartidaP = idPartida AND contador = fila AND jugador = idJugadorP AND colB = tipoNavio;
+        UPDATE TABLERO SET colC = ' ' WHERE idPartidaP = idPartida AND contador = fila AND jugador = idJugadorP AND colC = tipoNavio;
+        UPDATE TABLERO SET colD = ' ' WHERE idPartidaP = idPartida AND contador = fila AND jugador = idJugadorP AND colD = tipoNavio;
+        UPDATE TABLERO SET colE = ' ' WHERE idPartidaP = idPartida AND contador = fila AND jugador = idJugadorP AND colE = tipoNavio;
+        UPDATE TABLERO SET colF = ' ' WHERE idPartidaP = idPartida AND contador = fila AND jugador = idJugadorP AND colF = tipoNavio;
+        UPDATE TABLERO SET colG = ' ' WHERE idPartidaP = idPartida AND contador = fila AND jugador = idJugadorP AND colG = tipoNavio;
+        UPDATE TABLERO SET colH = ' ' WHERE idPartidaP = idPartida AND contador = fila AND jugador = idJugadorP AND colH = tipoNavio;
+        UPDATE TABLERO SET colI = ' ' WHERE idPartidaP = idPartida AND contador = fila AND jugador = idJugadorP AND colI = tipoNavio;
+        UPDATE TABLERO SET colJ = ' ' WHERE idPartidaP = idPartida AND contador = fila AND jugador = idJugadorP AND colJ = tipoNavio;
+        SET contador = contador + 1;
+    END WHILE;
 
 END//
 DELIMITER ;
