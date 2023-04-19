@@ -1,4 +1,5 @@
--- Active: 1681642058501@@127.0.0.1@3306@battleship
+-- Active: 1681730644093@@localhost@3306@battleship
+
 USE battleship;
 
 DROP FUNCTION IF EXISTS logUsuario;
@@ -339,7 +340,7 @@ CREATE TRIGGER actualizarEstado AFTER UPDATE ON NAVIO FOR EACH ROW
 `whole_trigger`:
 BEGIN
     
-    DECLARE idPartidaT, estadoAct, userId1, userId2, user1Des, user2Des, p1, a1, d1, s1, p2, a2, d2, s2 INT;
+    DECLARE idPartidaT, estadoAct, userId1, userId2, user1Des, user2Des, p1, a1, d1, s1, p2, a2, d2, s2, idJA, idJB INT;
 
     SET idPartidaT = OLD.idPartida;
     SELECT estado INTO estadoAct FROM PARTIDA WHERE idPartidaT = idPartida;
@@ -349,6 +350,7 @@ BEGIN
     SELECT portaaviones, acorazado, destructor, submarino INTO  p2, a2, d2, s2 FROM NAVIO WHERE idPartida = idPartidaT AND userId2 = jugador;
     SELECT destruidos INTO user1Des FROM NAVIO WHERE idPartidaT = idPartida AND userId1 = jugador;
     SELECT destruidos INTO user2Des FROM NAVIO WHERE idPartidaT = idPartida AND userId2 = jugador;
+    SELECT jugadorA, jugadorB INTO idJA, idJB FROM PARTIDA WHERE idPartidaT = idPartida;
 
     -- Verificamos si se ha terminado la fase de colocar navios
     IF EXISTS (SELECT 1 FROM PARTIDA WHERE estado = 0 AND idPartidaT = idPartida) AND p1 = 0 AND a1 = 0 AND d1 = 0 AND s1 = 0 AND p2 = 0 AND a2 = 0 AND d2 = 0 AND s2 = 0 THEN
@@ -358,10 +360,14 @@ BEGIN
 
     -- Verificamos si algun jugador ha destruido todos los navios
     IF user1Des = 4 OR user2Des = 4 THEN
-        IF estadoAct = 1 THEN
-            UPDATE PARTIDA SET estado = 3 WHERE idPartida = idPartidaT;
-        ELSE 
+        IF idJA = userId1 AND user1Des = 4 THEN
             UPDATE PARTIDA SET estado = 4 WHERE idPartida = idPartidaT;
+            UPDATE JUGADOR SET partidasGanadas = partidasGanadas + 1 WHERE idJugador = idJB;
+            UPDATE JUGADOR SET partidasPerdidas = partidasPerdidas + 1 WHERE idJugador = idJA;
+        ELSE 
+            UPDATE PARTIDA SET estado = 3 WHERE idPartida = idPartidaT;
+            UPDATE JUGADOR SET partidasGanadas = partidasGanadas + 1 WHERE idJugador = idJA;
+            UPDATE JUGADOR SET partidasPerdidas = partidasPerdidas + 1 WHERE idJugador = idJB;
         END IF;
     END IF;
 
@@ -400,6 +406,11 @@ BEGIN
     -- Verificamos que las coordenadas indicadas son correctas
     IF (coorY < 1 OR coorY > 10 OR coorX NOT IN ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J')) THEN
         RETURN 'Las coordenadas especificadas no son correctas.';
+    END IF;
+
+    -- Verificamos que la partida en fase de tiro
+    IF estadoAct = 3 OR estadoAct = 4 THEN
+        RETURN 'La partida ha finalizado. Has perdido.';
     END IF;
 
     -- Verificamos si es su turno
@@ -448,18 +459,22 @@ BEGIN
     ELSEIF tipoN = 'P' THEN
         CALL hundirNavio('P', idPartidaF, userIdE);
         UPDATE NAVIO SET destruidos = destruidos + 1 WHERE idPartidaF = idPartida AND jugador = userIdE;
+        UPDATE JUGADOR SET naviosHundidos = naviosHundidos + 1 WHERE idJugador = userId;
         RETURN 'IMPACTO: portaaviones enemigo destruido';
     ELSEIF tipoN= 'A' THEN
         CALL hundirNavio('A', idPartidaF, userIdE);
         UPDATE NAVIO SET destruidos = destruidos + 1 WHERE idPartidaF = idPartida AND jugador = userIdE;
+        UPDATE JUGADOR SET naviosHundidos = naviosHundidos + 1 WHERE idJugador = userId;
         RETURN 'IMPACTO: acorazado enemigo destruido';
     ELSEIF tipoN = 'D' THEN
         CALL hundirNavio('D', idPartidaF, userIdE);
         UPDATE NAVIO SET destruidos = destruidos + 1 WHERE idPartidaF = idPartida AND jugador = userIdE;
+        UPDATE JUGADOR SET naviosHundidos = naviosHundidos + 1 WHERE idJugador = userId;
         RETURN 'IMPACTO: destructor enemigo destruido';
     ELSEIF tipoN = 'S' THEN
         CALL hundirNavio('S', idPartidaF, userIdE);
         UPDATE NAVIO SET destruidos = destruidos + 1 WHERE idPartidaF = idPartida AND jugador = userIdE;
+        UPDATE JUGADOR SET naviosHundidos = naviosHundidos + 1 WHERE idJugador = userId;
         RETURN 'IMPACTO: submarino enemigo destruido';
     END IF;
 

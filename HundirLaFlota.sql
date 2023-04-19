@@ -1,4 +1,5 @@
--- Active: 1681642058501@@127.0.0.1@3306@battleship
+-- Active: 1681730644093@@localhost@3306@battleship
+
 
 /* Estructura de la BBDD */
 
